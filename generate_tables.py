@@ -136,6 +136,80 @@ data_10ma = {
                    40.5138, 41.2161, np.nan]
 }
 
+def format_value_latex(value, col):
+    """Format a value for LaTeX output."""
+    if pd.isna(value):
+        return "---"
+    elif col == 'Freq(Hz)':
+        return f"{int(value)}"
+    elif isinstance(value, float):
+        # Use scientific notation for very small numbers
+        if abs(value) < 0.001 and value != 0:
+            return f"{value:.4e}".replace('e-0', r'$\times 10^{-').replace('e-', r'$\times 10^{-') + '}$'
+        else:
+            return f"{value:.4f}"
+    else:
+        return str(value)
+
+def generate_latex_table(data, title, label):
+    """Generate LaTeX table code."""
+    df = pd.DataFrame(data)
+    
+    latex_code = []
+    latex_code.append(f"% {title}")
+    latex_code.append(r"\begin{table}[htbp]")
+    latex_code.append(r"  \centering")
+    latex_code.append(f"  \\caption{{{title}}}")
+    latex_code.append(f"  \\label{{tab:{label}}}")
+    latex_code.append(r"  \small")
+    latex_code.append(r"  \begin{tabular}{|c|c|c|c|c|c|c|c|c|}")
+    latex_code.append(r"    \hline")
+    
+    # Header row
+    headers = []
+    for col in df.columns:
+        if col == 'Freq(Hz)':
+            headers.append(r"\textbf{Freq (Hz)}")
+        elif col == 'V':
+            headers.append(r"\textbf{V}")
+        elif col == 'I':
+            headers.append(r"\textbf{I}")
+        elif col == 'P(V*I)':
+            headers.append(r"\textbf{P (V$\times$I)}")
+        elif col == 'V^2':
+            headers.append(r"\textbf{$V^2$}")
+        elif col == 'I^2':
+            headers.append(r"\textbf{$I^2$}")
+        elif col == '% Error to analytical':
+            headers.append(r"\textbf{\% Error}")
+        elif col == 'Est % spread':
+            headers.append(r"\textbf{Est \% spread}")
+        elif col == 'Est SNR dB':
+            headers.append(r"\textbf{Est SNR (dB)}")
+        else:
+            headers.append(f"\\textbf{{{col}}}")
+    
+    latex_code.append("    " + " & ".join(headers) + r" \\")
+    latex_code.append(r"    \hline")
+    
+    # Data rows
+    for idx, row in df.iterrows():
+        values = []
+        for col in df.columns:
+            values.append(format_value_latex(row[col], col))
+        latex_code.append("    " + " & ".join(values) + r" \\")
+        if idx % 5 == 4:  # Add horizontal line every 5 rows for readability
+            latex_code.append(r"    \hline")
+    
+    if len(df) % 5 != 0:  # Add final hline if not already added
+        latex_code.append(r"    \hline")
+    
+    latex_code.append(r"  \end{tabular}")
+    latex_code.append(r"\end{table}")
+    latex_code.append("")
+    
+    return "\n".join(latex_code)
+
 def format_table(data, title):
     """Format and display a table with proper alignment."""
     df = pd.DataFrame(data)
@@ -202,6 +276,27 @@ def main():
     
     print("\n" + "="*140)
     print("All tables generated successfully!")
+    print("="*140)
+    
+    # Generate LaTeX output
+    print("\nGenerating LaTeX code for Overleaf...")
+    
+    latex_output = []
+    latex_output.append("% LaTeX tables for Overleaf")
+    latex_output.append("% Copy the table code below into your Overleaf document")
+    latex_output.append("% Note: Make sure to include \\usepackage{booktabs} in your preamble for better formatting")
+    latex_output.append("")
+    
+    latex_output.append(generate_latex_table(data_200mv, "200mV Measurements", "200mv"))
+    latex_output.append(generate_latex_table(data_20ma, "20mA Measurements", "20ma"))
+    latex_output.append(generate_latex_table(data_10ma, "10mA Measurements", "10ma"))
+    
+    # Save LaTeX output to file
+    with open('measurement_tables_latex.tex', 'w') as f:
+        f.write("\n".join(latex_output))
+    
+    print("LaTeX code saved to 'measurement_tables_latex.tex'")
+    print("You can copy this file content directly into your Overleaf document!")
     print("="*140)
 
 if __name__ == "__main__":

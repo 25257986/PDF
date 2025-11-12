@@ -1,6 +1,6 @@
 # Measurement Tables Generator
 
-This repository contains a Python script that generates formatted measurement tables for electrical measurements at different current/voltage levels.
+This repository contains a Python script that generates formatted measurement tables for electrical measurements at different current/voltage levels, **including LaTeX code for use in Overleaf**.
 
 ## Overview
 
@@ -36,41 +36,65 @@ pip install numpy pandas
 
 ## Usage
 
-Run the script to generate and display all three tables:
+Run the script to generate both console output and LaTeX tables:
 
 ```bash
 python3 generate_tables.py
 ```
 
-The script will output:
-- Formatted tables with proper column alignment
-- Scientific notation for very small numbers (< 0.001)
-- NaN values for missing data at 50Hz and 3050Hz frequencies
-- No column overflow or viewing errors
+The script will:
+- Display formatted tables in the console with proper column alignment
+- Generate a `measurement_tables_latex.tex` file containing LaTeX code ready for Overleaf
+- Use scientific notation for very small numbers (< 0.001)
+- Show NaN values for missing data at 50Hz and 3050Hz frequencies
 
-## Output Format
+## Output Files
 
-The tables are formatted with:
-- 140 character width for optimal viewing
-- Centered column headers
-- Consistent spacing and alignment
-- Clear separation between tables
+1. **Console output** - Formatted tables displayed in the terminal
+2. **measurement_tables_latex.tex** - LaTeX table code ready to copy into your Overleaf document
 
-## Example Output
+## Using in Overleaf
 
-```
-============================================================================================================================================
-Table 1: 200mV Measurements
-============================================================================================================================================
-  Freq(Hz)       V           I          P(V*I)        V^2          I^2       % Error to analytical    Est % spread    Est SNR dB  
---------------------------------------------------------------------------------------------------------------------------------------------
-     50         NaN         NaN          NaN          NaN          NaN                NaN                 NaN            NaN      
-    150        0.2036      0.0028     5.7555e-04     0.0415     7.9895e-06           2.6569              0.6358        43.9333    
+1. Run the script: `python3 generate_tables.py`
+2. Open the generated `measurement_tables_latex.tex` file
+3. Copy the LaTeX code for the tables you need
+4. Paste into your Overleaf LaTeX document
+5. The tables use standard LaTeX table environment with:
+   - `\begin{table}[htbp]` for table positioning
+   - `\caption{}` for table titles
+   - `\label{}` for referencing (tab:200mv, tab:20ma, tab:10ma)
+   - Proper formatting with `\hline` separators every 5 rows
+
+## LaTeX Table Features
+
+- Professional formatting with borders
+- Centered columns
+- Bold headers with proper mathematical notation ($V^2$, $I^2$, V×I)
+- Scientific notation formatted as $\times 10^{-n}$
+- Missing values shown as "---"
+- Horizontal lines every 5 rows for readability
+
+## Example LaTeX Output
+
+```latex
+\begin{table}[htbp]
+  \centering
+  \caption{200mV Measurements}
+  \label{tab:200mv}
+  \small
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \textbf{Freq (Hz)} & \textbf{V} & \textbf{I} & ... \\
+    \hline
+    150 & 0.2036 & 0.0028 & 5.7555$\times 10^{-4}$ & ... \\
     ...
+  \end{tabular}
+\end{table}
 ```
 
 ## Notes
 
-- Data points at 50Hz and 3050Hz are marked as NaN (Not a Number) indicating missing or invalid measurements
-- Very small numbers are displayed in scientific notation (e.g., 5.7555e-04) for better readability
+- Data points at 50Hz and 3050Hz are marked as NaN (Not a Number) or "---" in LaTeX, indicating missing or invalid measurements
+- Very small numbers are displayed in scientific notation for better readability
 - All measurements are precisely formatted to 4 decimal places for consistency
+- The LaTeX tables are ready to use without modification in Overleaf
